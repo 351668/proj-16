@@ -1,164 +1,97 @@
-var PLAY = 1;
-var END = 0;
-var gameState = PLAY;
-
-var trex, trex_running, trex_collided;
-var ground, invisibleGround, groundImage;
-
-var cloudsGroup, cloudImage;
-var obstaclesGroup, obstacle1, obstacle2, obstacle3, obstacle4, obstacle5, obstacle6;
-
-var score;
-var gameOverimg,restartimg,gameOver,restart;
-
-
+var b, enemyImage, ballImage, scene, ball, alien1, alien2, alien3, score=0, opscore=0, speed=5
 
 function preload(){
-  trex_running = loadAnimation("trex1.png","trex3.png","trex4.png");
-  trex_collided = loadAnimation("trex_collided.png");
   
-  groundImage = loadImage("ground2.png");
-  
-  cloudImage = loadImage("cloud.png");
-  
-  obstacle1 = loadImage("obstacle1.png");
-  obstacle2 = loadImage("obstacle2.png");
-  obstacle3 = loadImage("obstacle3.png");
-  obstacle4 = loadImage("obstacle4.png");
-  obstacle5 = loadImage("obstacle5.png");
-  obstacle6 = loadImage("obstacle6.png");
-  gameOverimg=loadImage("gameOver.png");
-  restartimg=loadImage("restart.png")
+  b = loadImage("b.png");
+  enemyImage = loadImage("alien.png");
+  ballImage = loadImage("ball.png");
   
 }
 
+
+
 function setup() {
-  createCanvas(600, 200);
+  createCanvas(400, 400);
   
-  trex = createSprite(50,180,20,50);
-  trex.addAnimation("running", trex_running);
-  trex.addAnimation("collided" , trex_collided)
-  trex.scale = 0.5;
-  
-  ground = createSprite(200,180,400,20);
-  ground.addImage("ground",groundImage);
-  ground.x = ground.width /2;
- 
- gameOver= createSprite(300,100)
- gameOver.addImage(gameOverimg)
- restart=createSprite(300,50)
- restart.addImage(restartimg)
- gameOver.scale=0.5
- restart.scale=0.5
+  scene = createSprite(200,200);
+  scene.addImage(b)
+  ball = createSprite(200,345,200,345)
+  ball.addImage(ballImage)
+  ball.scale=0.1
+
+  alien1 = createSprite(200,280,10,10)
+  alien2 = createSprite(200,170,10,10)
+  alien3 = createSprite(200,50,10,10)
+  alien1.addImage(enemyImage)
+  alien2.addImage(enemyImage)
+  alien3.addImage(enemyImage)
+
+  alien1.scale=0.3
+  alien2.scale=0.3
+  alien3.scale=0.3
 
 
-  invisibleGround = createSprite(200,190,400,10);
-  invisibleGround.visible = false;
   
-  obstaclesGroup = createGroup();
-  cloudsGroup = createGroup();
-  
-  console.log("Hello" + 5);
-  
-  score = 0;
+   score = 0    
 }
 
 function draw() {
-  background(180);
-  text("Score: "+ score, 500,50);
-  
-  
-  
-  if(gameState === PLAY){
-       
-    ground.velocityX = -4;
-   
-    score = score + Math.round(frameCount/60);
-    
-    if (ground.x < 0){
-      ground.x = ground.width/2;
-    }
-    
-   
-    if(keyDown("space")&& trex.y >= 100) {
-        trex.velocityY = -13;
-    }
-    
-  
-    trex.velocityY = trex.velocityY + 0.8
-  
-  
-    spawnClouds();
-  
-    gameOver.visible=false;
-    restart.visible=false
-    spawnObstacles();
-    
-    if(obstaclesGroup.isTouching(trex)){
-        gameState = END;
-    }
-  }
-   else if (gameState === END) {
-       
-      ground.velocityX = 0;
-     gameOver.visible=true;
-     restart.visible=true
-     obstaclesGroup.setVelocityXEach(0);
-     cloudsGroup.setVelocityXEach(0);
-   }
-  
- 
+ background(0);
+ createEdgeSprites()
 
-  trex.collide(invisibleGround);
-  
-  
-  
-  drawSprites();
-}
+ alien1.x=alien1.x+speed
+ alien2.x=alien2.x-speed
+ alien3.x=alien3.x+speed
 
-function spawnObstacles(){
- if (frameCount % 60 === 0){
-   var obstacle = createSprite(400,165,10,40);
-   obstacle.velocityX = -6;
-   
-    var rand = Math.round(random(1,6));
-    switch(rand) {
-      case 1: obstacle.addImage(obstacle1);
-              break;
-      case 2: obstacle.addImage(obstacle2);
-              break;
-      case 3: obstacle.addImage(obstacle3);
-              break;
-      case 4: obstacle.addImage(obstacle4);
-              break;
-      case 5: obstacle.addImage(obstacle5);
-              break;
-      case 6: obstacle.addImage(obstacle6);
-              break;
-      default: break;
-    }
-   
-    obstacle.scale = 0.5;
-    obstacle.lifetime = 300;
-   
-    obstaclesGroup.add(obstacle);
+ if(alien1.x<0 || alien1.x>width)
+ {
+   speed=speed*-1
  }
+
+
+
+if(keyDown(UP_ARROW)){
+  ball.y=ball.y-3
 }
 
-function spawnClouds() {
-   if (frameCount % 60 === 0) {
-     cloud = createSprite(600,100,40,10);
-    cloud.y = Math.round(random(10,60));
-    cloud.addImage(cloudImage);
-    cloud.scale = 0.5;
-    cloud.velocityX = -3;
-    
-    cloud.lifetime = 134;
-    
-    cloud.depth = trex.depth;
-    trex.depth = trex.depth + 1;
-    
-   cloudsGroup.add(cloud);
-    }
+if(keyDown(DOWN_ARROW)){
+  ball.y=ball.y+3
 }
+
+if(keyDown(LEFT_ARROW)){
+  ball.x=ball.x-3
+}
+
+if(keyDown(RIGHT_ARROW)){
+  ball.x=ball.x+3
+}
+
+if(ball.isTouching(alien1)|| ball.isTouching(alien2)|| ball.isTouching(alien3)){
+    ball.x=200
+  ball.y=350
+  opscore = opscore+1
+}
+if(ball.y<0){
+  ball.x=200
+  ball.y=345
+  score=score+1
+}
+
+
+drawSprites();
+textSize(15)
+  fill("Yellow")
+  text("Humans:"+score,328,30);
+  
+
+textSize(15)
+  fill("Yellow")
+  text("Aliens:"+opscore,5,30);
+  
+
+    
+
+}
+
+
 
